@@ -1,3 +1,5 @@
+<img width="1536" height="1024" alt="ChatGPT Image 14 jul 2025, 07_19_26 p m" src="https://github.com/user-attachments/assets/a80da4a2-b6f1-4c21-8adc-d72d8d839cbf" />
+
 # 🎬 Screenmatch - API de Películas con Traducción Automática
 
 Este proyecto Spring Boot permite consultar películas usando la API pública de OMDb y traducir automáticamente la descripción (`plot`) al español usando la API de Gemini (Google AI).
@@ -24,6 +26,7 @@ Este proyecto Spring Boot permite consultar películas usando la API pública de
 - MapStruct
 - H2 Database (memoria)
 - Jackson & Gson
+  
 
 ---
 ## 🍿 Cómo obtener una API Key de OMDb
