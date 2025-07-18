@@ -4,10 +4,14 @@ import com.aluracursos.screenmatch.dto.response.MovieResponse;
 import com.aluracursos.screenmatch.entity.MovieEntity;
 import com.aluracursos.screenmatch.exception.MovieNotFoundException;
 import com.aluracursos.screenmatch.mapper.IMovieMapper;
+import com.aluracursos.screenmatch.repository.IMovieRepository;
 import com.aluracursos.screenmatch.util.ConvertJacksonData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -15,24 +19,31 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class ApiService {
     private final IMovieMapper mapper;
     private final ConvertJacksonData jacksonData;
     private final GeminiService geminiService;
+    private final IMovieRepository movieRepository;
 
-    public ApiService(IMovieMapper mapper, ConvertJacksonData jacksonData, GeminiService geminiService) {
+    public ApiService(IMovieMapper mapper, ConvertJacksonData jacksonData, GeminiService geminiService, IMovieRepository movieRepository) {
         this.mapper = mapper;
         this.jacksonData = jacksonData;
-
         this.geminiService = geminiService;
+        this.movieRepository = movieRepository;
     }
 
     public MovieResponse getMovieResponse(String title) {
         MovieEntity entity = getMovie(title);
         String translatedPlot = geminiService.obtenerTraduccion(entity.getPlot());
         entity.setPlot(translatedPlot);
+        // Asignar relación para ratings
+        if (entity.getRatings() != null) {
+            entity.getRatings().forEach(r -> r.setMovie(entity));
+        }
         return mapper.toResponse(entity);
     }
 
@@ -53,6 +64,10 @@ public class ApiService {
             if (!"True".equalsIgnoreCase(movie.getResponse())) {
                 throw new MovieNotFoundException("Movie not found or invalid response: " + title);
             }
+            // Aquí se asigna la relación inversa
+            if (movie.getRatings() != null) {
+                movie.getRatings().forEach(rating -> rating.setMovie(movie));
+            }
             return movie;
 
         } catch (IOException | InterruptedException e) {
@@ -60,4 +75,29 @@ public class ApiService {
             throw new RuntimeException("Error consuming the API", e);
         }
     }
-}
+
+    public MovieResponse getMovieResponseAndSave(String title) {
+        MovieEntity entity = getMovie(title);
+        entity.setPlot(geminiService.obtenerTraduccion(entity.getPlot()));
+
+        if (entity.getRatings() != null) {
+            entity.getRatings().forEach(r -> r.setMovie(entity));
+        }
+
+        MovieEntity saved = movieRepository.save(entity);
+        return mapper.toResponse(saved);
+    }
+
+
+    public List<MovieResponse> findAllMovies() {
+        List<MovieEntity> movies = movieRepository.findAll();
+        return mapper.toResponseList(movies);
+    }
+
+    public List<MovieResponse> findByTitleContaining(String title) {
+        List<MovieEntity> matches = movieRepository.findByTitleContainingIgnoreCase(title);
+        return mapper.toResponseList(matches);
+    }
+
+
+    }
