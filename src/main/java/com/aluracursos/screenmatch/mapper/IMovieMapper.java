@@ -5,7 +5,6 @@ import com.aluracursos.screenmatch.dto.response.MovieResponse;
 import com.aluracursos.screenmatch.entity.MovieEntity;
 import com.aluracursos.screenmatch.entity.RatingsEntity;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import java.util.List;
 

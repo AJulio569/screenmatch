@@ -2,13 +2,18 @@ package com.aluracursos.screenmatch.entity;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import jakarta.persistence.Id;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,7 +76,6 @@ public class MovieEntity {
     @JsonAlias("Ratings")
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RatingsEntity> ratings = new ArrayList<>();
-
 
     @JsonAlias("Metascore")
     private String metascore;

@@ -1,15 +1,17 @@
 package com.aluracursos.screenmatch.controller;
 
 import com.aluracursos.screenmatch.dto.response.MovieResponse;
-import com.aluracursos.screenmatch.entity.MovieEntity;
 import com.aluracursos.screenmatch.service.ApiService;
 import jakarta.validation.constraints.NotBlank;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 @RestController
@@ -45,5 +47,4 @@ public class MovieController {
             @RequestParam @NotBlank(message = "Title query cannot be empty") String title) {
         return ResponseEntity.ok(service.findByTitleContaining(title));
     }
-
 }
