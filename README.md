@@ -26,11 +26,12 @@ Este proyecto Spring Boot permite consultar películas usando la API pública de
 - MapStruct
 - H2 Database (memoria)
 - Jackson & Gson
+- Postgres (SQL)
   
 
 ---
 ## 🍿 Cómo obtener una API Key de OMDb
-**Para que tu aplicación funcione correctamente, necesitas una clave de acceso (API Key) gratuita desde el sitio de OMDb.**
+Para que tu aplicación funcione correctamente, necesitas una clave de acceso (API Key) gratuita desde el sitio de OMDb.
 
 ### 📝 Pasos para obtenerla:
 
@@ -91,14 +92,127 @@ Este proyecto utiliza una clave API de [Google AI Studio (Gemini)](https://maker
    
 ---
 
-##  🧪 Ejemplo de uso
+## 🐘 Configuración de PostgreSQL (opcional)
 
- **Consulta una película en tu navegador o con Postman:**
+Este proyecto también puede usar **`PostgreSQL`** como base de datos en lugar de H2 en memoria. 
+Si deseas persistencia real de los datos entre reinicios, puedes usar PostgreSQL.
+
+### 🔽 Descarga e instalación
+
+1. Ve al sitio oficial de PostgreSQL y descarga la versión más reciente para tu sistema operativo:
+
+   👉 [https://makersuite.google.com/app/apikey](https://makersuite.google.com/app/apikey)
+2. Durante la instalación, asegúrate de configurar un usuario, contraseña y puerto (por defecto es el 5432).
+
+## ⚙️ 🛠️ Configuración del perfil PostgreSQL
+1. Crea un archivo de configuración:
+
+   `src/main/resources/application-postgres.properties`
+2. Copia y edita este contenido:
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/TU_BASE_DE_DATOS
+spring.datasource.username=postgres
+spring.datasource.password=TU_PASSWORD
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+ ``` 
+ **🔐 Reemplaza TU_PASSWORD con la contraseña real de tu usuario PostgreSQL.**
+___
+
+## 🚀 Activar perfil de PostgreSQL
+
+Para levantar la app usando PostgreSQL, ejecuta con el siguiente perfil:
 
 ```bash
-  GET http://localhost:8080/api/movies/v1/nombre-de-la-película
+     ./mvnw spring-boot:run -Dspring-boot.run.profiles=postgres
+
+```
+**⚙️ Configuración en `application.properties`**
+
+Configura el perfil activo:
+
+**`spring.profiles.active=postgres`**
+___
+
+
+
+## 🌐 Endpoints disponibles
+La API expone los siguientes endpoints:
+
+Consulta una película en tu **`navegador o con Postman:`**
+
+ ### 🎥 `GET /api/movies/v1/{title}`
+
+Consulta una película por su título (en inglés). Busca en la base de datos local, y si no existe, la trae desde la API pública de OMDb, traduce la sinopsis al español con Gemini.
+
+  - **Parámetros de ruta**:
+
+    - **title**: Título de la película (en inglés, sin espacios o codificado en URL).
+    
+- **Ejemplo de uso**:
+
+```bash
+  GET http://localhost:8080/api/movies/v1/Halo
  ```
-**Respuesta esperada:**
+
+- **Respuesta esperada (`200 OK`):**
+```json
+ {
+    "title": "Halo",
+    "year": "2022–2024",
+    "rated": "TV-14",
+    "released": "24 Mar 2022",
+    "runtime": "N/A",
+    "genre": "Action, Adventure, Sci-Fi",
+    "director": "N/A",
+    "writer": null,
+    "actors": "Pablo Schreiber, Shabana Azmi, Natasha Culzac",
+    "plot": "Con la galaxia al borde de la destrucción, el Jefe Maestro John-117 lidera a su equipo de Spartans contra la amenaza alienígena conocida como el Covenant.\n",
+    "language": "English",
+    "country": "United States",
+    "awards": "6 wins & 3 nominations total",
+    "poster": "https://m.media-amazon.com/images/M/MV5BYzNkODg3OTYtM2EyZC00NmEyLTgzZDktYjY5NGNjZmQ5ZDRiXkEyXkFqcGc@._V1_SX300.jpg",
+    "metascore": "N/A",
+    "imdbRating": "7.3",
+    "imdbVotes": "104,700",
+    "imdbID": "tt2934286",
+    "type": "series",
+    "totalSeasons": "2",
+    "response": "True",
+    "ratings": [
+        {
+            "source": "Internet Movie Database",
+            "value": "7.3/10"
+        }
+    ]
+}
+ ```
+---
+ 
+### 💾 `POST /api/movies/v1/save/{title}`
+
+Consulta y guarda una película en la base de datos.
+
+- **Parámetros de ruta**:
+
+    - **title**: Título de la película (en inglés, sin espacios o codificado en URL).
+- **Acción**:
+    - Obtiene la película desde OMDb.
+    - Traduce la sinopsis con Gemini.
+    - Guarda la información en la base de datos (H2 o PostgreSQL).
+
+- **Ejemplo de uso**:
+
+```bash
+  POST http://localhost:8080/api/movies/v1/save/Halo
+ ```
+
+- **Respuesta esperada (`200 OK`):**
 ```json
  {
     "title": "Halo",
@@ -132,6 +246,171 @@ Este proyecto utiliza una clave API de [Google AI Studio (Gemini)](https://maker
  ```
 ---
 
+### 📋 `GET /api/movies/v1/all`
+
+Lista todas las películas almacenadas en la base de datos.
+
+- **Respuesta**: Lista JSON de películas guardadas.
+
+- **Ejemplo de uso**:
+
+```bash
+  GET http://localhost:8080/api/movies/v1/all
+ ```
+
+- **Respuesta esperada (`200 OK`):**
+```json
+ [
+  {
+    "title": "Halo",
+    "year": "2022–2024",
+    "rated": "TV-14",
+    "released": "24 Mar 2022",
+    "runtime": "N/A",
+    "genre": "Action, Adventure, Sci-Fi",
+    "director": "N/A",
+    "writer": null,
+    "actors": "Pablo Schreiber, Shabana Azmi, Natasha Culzac",
+    "plot": "Con la galaxia al borde de la destrucción, el Jefe Maestro John-117 lidera a su equipo de Spartans contra la amenaza alienígena conocida como el Covenant.\n",
+    "language": "English",
+    "country": "United States",
+    "awards": "6 wins & 3 nominations total",
+    "poster": "https://m.media-amazon.com/images/M/MV5BYzNkODg3OTYtM2EyZC00NmEyLTgzZDktYjY5NGNjZmQ5ZDRiXkEyXkFqcGc@._V1_SX300.jpg",
+    "metascore": "N/A",
+    "imdbRating": "7.3",
+    "imdbVotes": "104,700",
+    "imdbID": "tt2934286",
+    "type": "series",
+    "totalSeasons": "2",
+    "response": "True",
+    "ratings": [
+      {
+        "source": "Internet Movie Database",
+        "value": "7.3/10"
+      }
+    ]
+  },
+  {
+    "title": "Matrix",
+    "year": "1993",
+    "rated": "N/A",
+    "released": "01 Mar 1993",
+    "runtime": "60 min",
+    "genre": "Action, Drama, Fantasy",
+    "director": "N/A",
+    "writer": null,
+    "actors": "Nick Mancuso, Phillip Jarrett, Carrie-Anne Moss",
+    "plot": "Aquí está la traducción al español:\n\nEl asesino a sueldo Steven Matrix recibe un disparo, experimenta el más allá y obtiene una segunda oportunidad ayudando a otros. Despierta, conoce a guías que le asignan casos donde ayuda a personas usando métodos poco convencionales de su antigua profesión.\n",
+    "language": "English",
+    "country": "Canada",
+    "awards": "1 win total",
+    "poster": "https://m.media-amazon.com/images/M/MV5BM2JiZjU1NmQtNjg1Ni00NjA3LTk2MjMtNjYxMTgxODY0NjRhXkEyXkFqcGc@._V1_SX300.jpg",
+    "metascore": "N/A",
+    "imdbRating": "7.2",
+    "imdbVotes": "220",
+    "imdbID": "tt0106062",
+    "type": "series",
+    "totalSeasons": "N/A",
+    "response": "True",
+    "ratings": [
+      {
+        "source": "Internet Movie Database",
+        "value": "7.2/10"
+      }
+    ]
+  }
+]
+ ```
+---
+
+### 🔍 `GET /api/movies/v1/search?title={partialTitle}`
+Busca películas por coincidencia parcial en el título (desde la base de datos local).
+
+- **Parámetros de ruta**:
+
+    - **title**: Título de la película (en inglés, sin espacios o codificado en URL).
+
+- **Ejemplo de uso**:
+
+```bash
+  GET http://localhost:8080/api/movies/v1/search?title=matrix
+ ```
+
+- **Respuesta esperada (`200 OK`):**
+```json
+ [
+  {
+    "title": "Matrix",
+    "year": "1993",
+    "rated": "N/A",
+    "released": "01 Mar 1993",
+    "runtime": "60 min",
+    "genre": "Action, Drama, Fantasy",
+    "director": "N/A",
+    "writer": null,
+    "actors": "Nick Mancuso, Phillip Jarrett, Carrie-Anne Moss",
+    "plot": "Aquí está la traducción al español:\n\nEl asesino a sueldo Steven Matrix recibe un disparo, experimenta el más allá y obtiene una segunda oportunidad ayudando a otros. Despierta, conoce a guías que le asignan casos donde ayuda a personas usando métodos poco convencionales de su antigua profesión.\n",
+    "language": "English",
+    "country": "Canada",
+    "awards": "1 win total",
+    "poster": "https://m.media-amazon.com/images/M/MV5BM2JiZjU1NmQtNjg1Ni00NjA3LTk2MjMtNjYxMTgxODY0NjRhXkEyXkFqcGc@._V1_SX300.jpg",
+    "metascore": "N/A",
+    "imdbRating": "7.2",
+    "imdbVotes": "220",
+    "imdbID": "tt0106062",
+    "type": "series",
+    "totalSeasons": "N/A",
+    "response": "True",
+    "ratings": [
+      {
+        "source": "Internet Movie Database",
+        "value": "7.2/10"
+      }
+    ]
+  }
+]
+ ```
+---
+## ⚠️ Posibles errores por endpoint
+
+### 🔍 `GET /api/movies/v1/{title}`
+
+| Código | Error                | Causa posible                                | Ejemplo de respuesta                                              |
+|--------|----------------------|----------------------------------------------|-------------------------------------------------------------------|
+| 400    | Invalid title        | El título es nulo, vacío o inválido          | `{ "error": "Invalid movie title provided." }`                    |
+| 404    | Movie not found      | La película no fue encontrada en OMDb        | `{ "error": "Movie not found for title: unknown" }`              |
+| 500    | Internal Server Error| Error interno al consultar o traducir        | `{ "error": "Error while fetching or translating movie data." }` |
+
+---
+
+### 💾 `POST /api/movies/v1/save/{title}`
+
+| Código | Error                | Causa posible                                          | Ejemplo de respuesta                                        |
+|--------|----------------------|--------------------------------------------------------|-------------------------------------------------------------|
+| 400    | Invalid title        | El título está vacío o es nulo                         | `{ "error": "Invalid movie title provided." }`              |
+| 404    | Movie not found      | No se encontró en OMDb                                | `{ "error": "Movie not found for title: matrixx" }`         |
+| 409    | Movie already exists | Ya existe una película con ese título guardada        | `{ "error": "Movie 'Matrix' is already stored." }`          |
+| 500    | Internal Error       | Fallo en traducción o persistencia                    | `{ "error": "Failed to translate or save movie." }`         |
+
+---
+
+### 📋 `GET /api/movies/v1/all`
+
+| Código | Error                | Causa posible                               | Ejemplo de respuesta                                             |
+|--------|----------------------|---------------------------------------------|------------------------------------------------------------------|
+| 200    | OK                   | Devuelve lista (vacía o con datos)          | `[ { "title": "Matrix", ... } ]`                                |
+| 500    | Database error       | Problema al consultar la base de datos      | `{ "error": "Could not fetch movies from database." }`         |
+
+---
+
+### 🔍 `GET /api/movies/v1/search?title={partialTitle}`
+
+| Código | Error                | Causa posible                                          | Ejemplo de respuesta                                             |
+|--------|----------------------|--------------------------------------------------------|------------------------------------------------------------------|
+| 400    | Missing parameter    | No se pasó el parámetro `title`                        | `{ "error": "Query parameter 'title' is required." }`           |
+| 200    | OK                   | Devuelve coincidencias o lista vacía                  | `[ { "title": "Matrix" } ]`                                     |
+| 500    | Internal Error       | Fallo en la búsqueda o conexión                        | `{ "error": "Search operation failed." }`                       |
+---
 ##  📝 Notas
 - La API Key de OMDb está hardcodeada, puedes moverla a **`application.properties`** si prefieres ocultarla.
 - El proyecto usa H2 como base de datos en memoria, por lo que no necesitas configurar una base externa.
