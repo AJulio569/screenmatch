@@ -11,7 +11,7 @@ Este proyecto Spring Boot permite consultar películas usando la API pública de
 - Consulta de películas por título desde OMDb API.
 - Traducción automática de la sinopsis usando Google Gemini (IA generativa).
 - Arquitectura limpia con Spring Boot 3 y Java 21.
-- Separación de servicios, controladores, DTOs y manejo de errores personalizado.
+- Separación de servicios, controladores, DTO y manejo de errores personalizado.
 - Seguridad: la API Key de Gemini nunca se sube al repositorio.
 
 ---
@@ -132,7 +132,7 @@ PASSWORD_POSTGRES=admin123
 ### ⚠️ IMPORTANTE: Asegúrate de que tu archivo **`.env`** esté excluido del control de versiones (**`.gitignore`**).
 
 ---
-## ⚙️ 🛠️ Configuración del perfil PostgreSQL
+## ⚙️ Configuración del perfil PostgreSQL
 1. Crea un archivo de configuración:
 
    `src/main/resources/application-postgres.properties`
@@ -403,11 +403,11 @@ Busca películas por coincidencia parcial en el título (desde la base de datos 
 
 ### 🔍 `GET /api/movies/v1/{title}`
 
-| Código | Error                | Causa posible                                | Ejemplo de respuesta                                              |
-|--------|----------------------|----------------------------------------------|-------------------------------------------------------------------|
-| 400    | Invalid title        | El título es nulo, vacío o inválido          | `{ "error": "Invalid movie title provided." }`                    |
-| 404    | Movie not found      | La película no fue encontrada en OMDb        | `{ "error": "Movie not found for title: unknown" }`              |
-| 500    | Internal Server Error| Error interno al consultar o traducir        | `{ "error": "Error while fetching or translating movie data." }` |
+| Código | Error                | Causa posible                                | Ejemplo de respuesta                                                |
+|--------|----------------------|----------------------------------------------|---------------------------------------------------------------------|
+| 400    | Invalid title        | El título es nulo, vacío o inválido          | `{ "error": "Invalid movie title provided." }`                      |
+| 404    | Movie not found      | La película no fue encontrada en OMDb        | `{ "error": "Movie not found for title: unknown" }`                 |
+| 500    | Internal Server Error| Error interno al consultar o traducir        | `{ "error": "Error while fetching or translating movie data." }`    |
 
 ---
 
@@ -440,7 +440,7 @@ Busca películas por coincidencia parcial en el título (desde la base de datos 
 | 500    | Internal Error       | Fallo en la búsqueda o conexión                        | `{ "error": "Search operation failed." }`                       |
 ---
 ##  📝 Notas
-- La API Key de OMDb está hardcodeada, puedes moverla a **`application.properties`** si prefieres ocultarla.
+- La API Key de OMDb está hardcode, puedes moverla a **`application.properties`** si prefieres ocultarla.
 - El proyecto usa H2 como base de datos en memoria, por lo que no necesitas configurar una base externa.
 
 ---
