@@ -63,7 +63,7 @@ Para que tu aplicación funcione correctamente, necesitas una clave de acceso (A
           @Value("${omdb.api.key}")
           private String omdbApiKey;
      ```
- ## 🛑 Notas importantes
+ ### 🛑 Notas importantes
  - El plan gratuito tiene límite de 1,000 peticiones por día.
  - No uses esta API para fines comerciales sin autorización del proveedor.
         
@@ -103,7 +103,35 @@ Si deseas persistencia real de los datos entre reinicios, puedes usar PostgreSQL
 
    👉 [https://makersuite.google.com/app/apikey](https://makersuite.google.com/app/apikey)
 2. Durante la instalación, asegúrate de configurar un usuario, contraseña y puerto (por defecto es el 5432).
+---
+## 🔐 Configuración de variables de entorno para PostgreSQL
 
+Para mantener segura y flexible la conexión a la base de datos PostgreSQL, este proyecto utiliza **variables de entorno** en lugar de datos sensibles escritos directamente en el archivo de configuración.
+
+### 📁 Variables requeridas
+
+Estas son las variables que debes definir en tu entorno (puedes usar un archivo `.env`, configurar en tu sistema operativo o en tu IDE):
+
+| Variable            | Descripción                               | Ejemplo                   |
+|---------------------|-------------------------------------------|---------------------------|
+| `DB_HOST`           | Host donde corre PostgreSQL               | `localhost`               |
+| `PORT_POSTGRES`     | Puerto de conexión a PostgreSQL           | `5432`                    |
+| `DB_NAME`           | Nombre de la base de datos                | `movie_db`                |
+| `USER_POSTGRES`     | Usuario de PostgreSQL                     | `postgres`                |
+| `PASSWORD_POSTGRES` | Contraseña del usuario PostgreSQL         | `admin123`                |
+
+### 🧪 Ejemplo de archivo `.env` (no se sube al repo)
+
+```env
+DB_HOST=localhost
+PORT_POSTGRES=5432
+DB_NAME=movie_db
+USER_POSTGRES=postgres
+PASSWORD_POSTGRES=admin123
+```
+### ⚠️ IMPORTANTE: Asegúrate de que tu archivo **`.env`** esté excluido del control de versiones (**`.gitignore`**).
+
+---
 ## ⚙️ 🛠️ Configuración del perfil PostgreSQL
 1. Crea un archivo de configuración:
 
@@ -111,17 +139,16 @@ Si deseas persistencia real de los datos entre reinicios, puedes usar PostgreSQL
 2. Copia y edita este contenido:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/TU_BASE_DE_DATOS
-spring.datasource.username=postgres
-spring.datasource.password=TU_PASSWORD
+spring.datasource.url=jdbc:postgresql://${DB_HOST}:${PORT_POSTGRES}/${DB_NAME}
+spring.datasource.username=${USER_POSTGRES}
+spring.datasource.password=${PASSWORD_POSTGRES}
 spring.datasource.driver-class-name=org.postgresql.Driver
 
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-
- ``` 
- **🔐 Reemplaza TU_PASSWORD con la contraseña real de tu usuario PostgreSQL.**
+``` 
+### 🔐 Reemplaza TU_PASSWORD con la contraseña real de tu usuario PostgreSQL.
 ___
 
 ## 🚀 Activar perfil de PostgreSQL
@@ -132,13 +159,14 @@ Para levantar la app usando PostgreSQL, ejecuta con el siguiente perfil:
      ./mvnw spring-boot:run -Dspring-boot.run.profiles=postgres
 
 ```
-**⚙️ Configuración en `application.properties`**
+### ⚙️ Configuración en `application.properties`
 
 Configura el perfil activo:
 
-**`spring.profiles.active=postgres`**
+```propertis
+     spring.profiles.active=postgres`
+```
 ___
-
 
 
 ## 🌐 Endpoints disponibles
@@ -146,7 +174,7 @@ La API expone los siguientes endpoints:
 
 Consulta una película en tu **`navegador o con Postman:`**
 
- ### 🎥 `GET /api/movies/v1/{title}`
+### 🎥 `GET /api/movies/v1/{title}`
 
 Consulta una película por su título (en inglés). Busca en la base de datos local, y si no existe, la trae desde la API pública de OMDb, traduce la sinopsis al español con Gemini.
 
@@ -172,7 +200,7 @@ Consulta una película por su título (en inglés). Busca en la base de datos lo
     "director": "N/A",
     "writer": null,
     "actors": "Pablo Schreiber, Shabana Azmi, Natasha Culzac",
-    "plot": "Con la galaxia al borde de la destrucción, el Jefe Maestro John-117 lidera a su equipo de Spartans contra la amenaza alienígena conocida como el Covenant.\n",
+    "plot": "Con la galaxia al borde de la destrucción, el Jefe Maestro John-117 lidera a su equipo de Spartans contra la amenaza alienígena conocida como el Covenant.",
     "language": "English",
     "country": "United States",
     "awards": "6 wins & 3 nominations total",
@@ -271,7 +299,7 @@ Lista todas las películas almacenadas en la base de datos.
     "director": "N/A",
     "writer": null,
     "actors": "Pablo Schreiber, Shabana Azmi, Natasha Culzac",
-    "plot": "Con la galaxia al borde de la destrucción, el Jefe Maestro John-117 lidera a su equipo de Spartans contra la amenaza alienígena conocida como el Covenant.\n",
+    "plot": "Con la galaxia al borde de la destrucción, el Jefe Maestro John-117 lidera a su equipo de Spartans contra la amenaza alienígena conocida como el Covenant.",
     "language": "English",
     "country": "United States",
     "awards": "6 wins & 3 nominations total",
@@ -300,7 +328,7 @@ Lista todas las películas almacenadas en la base de datos.
     "director": "N/A",
     "writer": null,
     "actors": "Nick Mancuso, Phillip Jarrett, Carrie-Anne Moss",
-    "plot": "Aquí está la traducción al español:\n\nEl asesino a sueldo Steven Matrix recibe un disparo, experimenta el más allá y obtiene una segunda oportunidad ayudando a otros. Despierta, conoce a guías que le asignan casos donde ayuda a personas usando métodos poco convencionales de su antigua profesión.\n",
+    "plot": "Aquí está la traducción al español: El asesino a sueldo Steven Matrix recibe un disparo, experimenta el más allá y obtiene una segunda oportunidad ayudando a otros. Despierta, conoce a guías que le asignan casos donde ayuda a personas usando métodos poco convencionales de su antigua profesión.",
     "language": "English",
     "country": "Canada",
     "awards": "1 win total",
@@ -349,7 +377,7 @@ Busca películas por coincidencia parcial en el título (desde la base de datos 
     "director": "N/A",
     "writer": null,
     "actors": "Nick Mancuso, Phillip Jarrett, Carrie-Anne Moss",
-    "plot": "Aquí está la traducción al español:\n\nEl asesino a sueldo Steven Matrix recibe un disparo, experimenta el más allá y obtiene una segunda oportunidad ayudando a otros. Despierta, conoce a guías que le asignan casos donde ayuda a personas usando métodos poco convencionales de su antigua profesión.\n",
+    "plot": "Aquí está la traducción al español: El asesino a sueldo Steven Matrix recibe un disparo, experimenta el más allá y obtiene una segunda oportunidad ayudando a otros. Despierta, conoce a guías que le asignan casos donde ayuda a personas usando métodos poco convencionales de su antigua profesión.",
     "language": "English",
     "country": "Canada",
     "awards": "1 win total",
